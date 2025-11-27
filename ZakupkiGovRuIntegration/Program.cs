@@ -8,7 +8,7 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddHttpClient<IPurchaseService,PurchaseService>(c =>
 {
-    c.DefaultRequestHeaders.Add("User-Agent","PostmanRuntime/7.49.1");
+    c.DefaultRequestHeaders.Add("User-Agent","Postman");
     c.BaseAddress = new Uri("https://zakupki.gov.ru");
 });
 

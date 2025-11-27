@@ -1,20 +1,17 @@
 ﻿using AngleSharp;
-using AngleSharp.Dom;
 
-using System.Collections.Generic;
-using System.Text.Json;
-
-using static System.Collections.Specialized.BitVector32;
+using System.Xml;
 
 namespace ZakupkiGovRuIntegration.Helpers
 {
     public static class HttpClientExtensions
     {
-        private static readonly string[] sectionsWithTables = { "Финансовое обеспечение закупки (всего)","За счет бюджетных средств","Детализация по кодам видов расходов" }; 
-        public static async Task<Dictionary<string,Dictionary<string,string>>> ReadContentAsync(this HttpResponseMessage response)
+        public static async Task<Dictionary<string,Dictionary<string,string>>> ReadContent44FZAsync(this HttpResponseMessage response)
         {
             if (response.IsSuccessStatusCode == false)
-                throw new ApplicationException($"Something went wrong calling the API: {response.ReasonPhrase}");
+            {
+                throw new ApplicationException($"Аукцион с данным реестровым номером не найден. Ответ сервера : {response.ReasonPhrase}");
+            }
             var dataAsString = await response.Content.ReadAsStringAsync();
 
             var rows = new Dictionary<string,Dictionary<string, string>>();
@@ -31,7 +28,7 @@ namespace ZakupkiGovRuIntegration.Helpers
                 foreach (var rowNode in rowNodes)
                 {
                     var colNode = rowNode.QuerySelector(".col");
-                    var title = colNode?.QuerySelector("h2")?.TextContent ?? "Name not available"; ;
+                    var title = colNode?.QuerySelector("h2")?.TextContent ?? "Name not available";
                     var sections = colNode?.QuerySelectorAll(".blockInfo__section");
                     var sectionDictionary = new Dictionary<string,string>();
 
@@ -128,6 +125,52 @@ namespace ZakupkiGovRuIntegration.Helpers
                     }
                 }
             }
+            return rows;
+        }
+
+        public static async Task<Dictionary<string,Dictionary<string,string>>> ReadContent223FZAsync(this HttpResponseMessage response)
+        {
+            if (response.IsSuccessStatusCode == false)
+            {
+                throw new ApplicationException($"Аукцион с данным реестровым номером не найден. Ответ сервера : {response.ReasonPhrase}");
+            }
+            var dataAsString = await response.Content.ReadAsStringAsync();
+
+            var rows = new Dictionary<string,Dictionary<string,string>>();
+
+            var config = Configuration.Default.WithDefaultLoader();
+            var context = BrowsingContext.New(config);
+            var document = await context.OpenAsync(req => req.Content(dataAsString));
+
+            var wrapper = document.QuerySelector(".wrapper");
+
+            var rowNodes = wrapper.QuerySelectorAll(".card-common-content");
+            if (rowNodes != null)
+            {
+                foreach (var cardNode in rowNodes)
+                {
+                    var sectionNode = cardNode.QuerySelector("section.common-text");
+                    var containerNode = cardNode.QuerySelector(".container");
+                    var rowNode = cardNode.QuerySelector(".row");
+
+                    var columns = sectionNode?.QuerySelectorAll(".col-9");
+                    if (columns != null && columns.Count() > 0)
+                    {
+                        var title = columns.First().QuerySelector(".common-text__caption")?.TextContent ?? "Name not available";
+                        var columnDictionary = new Dictionary<string,string>();
+                        foreach (var column in columns.Skip(1))
+                        { 
+                            var columnTitle = column.QuerySelector(".common-text__title")?.TextContent ?? string.Empty;
+                            var columnnValue = column.QuerySelector(".common-text__value")?.TextContent ?? string.Empty;
+                            columnDictionary.Add(columnTitle,columnnValue);
+                                
+                        }
+
+                        rows.Add(title.Replace("\t","").Replace("\n"," ").Trim(),columnDictionary);
+                    }
+                    }
+                }
+           
             return rows;
         }
     }
