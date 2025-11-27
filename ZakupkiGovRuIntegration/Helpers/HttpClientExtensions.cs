@@ -22,7 +22,7 @@ namespace ZakupkiGovRuIntegration.Helpers
 
             var wrapper = document.QuerySelector(".wrapper");
 
-            var rowNodes =wrapper.QuerySelectorAll(".blockInfo");
+            var rowNodes =wrapper!.QuerySelectorAll(".blockInfo");
             if (rowNodes != null)
             {
                 foreach (var rowNode in rowNodes)
@@ -144,7 +144,7 @@ namespace ZakupkiGovRuIntegration.Helpers
 
             var wrapper = document.QuerySelector(".wrapper");
 
-            var rowNodes = wrapper.QuerySelectorAll(".card-common-content");
+            var rowNodes = wrapper!.QuerySelectorAll(".card-common-content");
             if (rowNodes != null)
             {
                 foreach (var cardNode in rowNodes)
