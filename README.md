@@ -1,2 +1,3 @@
 # ZakupkiGovRuIntegration
-Application imports data about auctions from zakupkigovru
+Приложение импортирует общую информацию об электронном аукционе с сайта госзакупок.
+В качестве входных данных реестровый номер электронного аукциона.
